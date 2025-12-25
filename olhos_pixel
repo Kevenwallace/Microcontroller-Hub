@@ -1,0 +1,58 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+void setup() {
+  Wire.begin(8, 9); // SDA=8, SCL=9 no ESP32-C3
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+}
+
+// Função para desenhar os olhos com pupila centralizada
+void desenharOlhos(int offset_x, int palpebra) {
+  display.clearDisplay();
+  
+  // --- Olho Esquerdo ---
+  if (palpebra < 5) { 
+    // Parte Branca
+    display.fillRoundRect(30 + offset_x, 20, 25, 30, 8, WHITE); 
+    // Pupila Preta (centralizada no retângulo branco)
+    // x = 30 + offset + metade da largura(12)
+    // y = 20 + metade da altura(15)
+    display.fillCircle(30 + offset_x + 12, 35, 4, BLACK);
+  } else { 
+    display.fillRect(30 + offset_x, 35, 25, 4, WHITE);
+  }
+
+  // --- Olho Direito ---
+  if (palpebra < 5) {
+    // Parte Branca
+    display.fillRoundRect(75 + offset_x, 20, 25, 30, 8, WHITE);
+    // Pupila Preta (centralizada no retângulo branco)
+    display.fillCircle(75 + offset_x + 12, 35, 4, BLACK);
+  } else {
+    display.fillRect(75 + offset_x, 35, 25, 4, WHITE);
+  }
+
+  display.display();
+}
+
+void loop() {
+  // Olhando para a esquerda
+  desenharOlhos(-5, 0);
+  delay(1500);
+
+  // Piscada rápida (centralizado)
+  desenharOlhos(0, 10);
+  delay(100);
+
+  // Olhando para a direita
+  desenharOlhos(5, 0);
+  delay(1500);
+
+  // Piscada rápida (centralizado)
+  desenharOlhos(0, 10);
+  delay(100);
+}
