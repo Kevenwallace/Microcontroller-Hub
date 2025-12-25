@@ -2,57 +2,75 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-Adafruit_SSD1306 display(128, 64, &Wire, -1);
+// ----- Configuração da tela -----
+#define SCREEN_W 128
+#define SCREEN_H 60   // usamos só 60px de altura
 
-void setup() {
-  Wire.begin(8, 9); // SDA=8, SCL=9 no ESP32-C3
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.clearDisplay();
-}
+Adafruit_SSD1306 display(SCREEN_W, 64, &Wire, -1);
 
-// Função para desenhar os olhos com pupila centralizada
-void desenharOlhos(int offset_x, int palpebra) {
+// ----- Parâmetros dos olhos -----
+#define OLHO_W 25
+#define OLHO_H 30
+#define PUPILA_R 4
+
+// Centro vertical da tela
+int centroY = SCREEN_H / 2;
+
+// Desenha os olhos
+void desenharOlhos(int offsetX, bool piscando) {
   display.clearDisplay();
-  
-  // --- Olho Esquerdo ---
-  if (palpebra < 5) { 
-    // Parte Branca
-    display.fillRoundRect(30 + offset_x, 20, 25, 30, 8, WHITE); 
-    // Pupila Preta (centralizada no retângulo branco)
-    // x = 30 + offset + metade da largura(12)
-    // y = 20 + metade da altura(15)
-    display.fillCircle(30 + offset_x + 12, 35, 4, BLACK);
-  } else { 
-    display.fillRect(30 + offset_x, 35, 25, 4, WHITE);
+
+  int olhoY = centroY - OLHO_H / 2;
+
+  // ----- Olho esquerdo -----
+  int olhoEsqX = 30 + offsetX;
+
+  if (!piscando) {
+    display.fillRoundRect(olhoEsqX, olhoY, OLHO_W, OLHO_H, 8, WHITE);
+    display.fillCircle(
+      olhoEsqX + OLHO_W / 2,
+      olhoY + OLHO_H / 2,
+      PUPILA_R,
+      BLACK
+    );
+  } else {
+    display.fillRect(olhoEsqX, centroY, OLHO_W, 3, WHITE);
   }
 
-  // --- Olho Direito ---
-  if (palpebra < 5) {
-    // Parte Branca
-    display.fillRoundRect(75 + offset_x, 20, 25, 30, 8, WHITE);
-    // Pupila Preta (centralizada no retângulo branco)
-    display.fillCircle(75 + offset_x + 12, 35, 4, BLACK);
+  // ----- Olho direito -----
+  int olhoDirX = 75 + offsetX;
+
+  if (!piscando) {
+    display.fillRoundRect(olhoDirX, olhoY, OLHO_W, OLHO_H, 8, WHITE);
+    display.fillCircle(
+      olhoDirX + OLHO_W / 2,
+      olhoY + OLHO_H / 2,
+      PUPILA_R,
+      BLACK
+    );
   } else {
-    display.fillRect(75 + offset_x, 35, 25, 4, WHITE);
+    display.fillRect(olhoDirX, centroY, OLHO_W, 3, WHITE);
   }
 
   display.display();
 }
 
+void setup() {
+  Wire.begin(8, 9); // SDA, SCL (ESP32-C3 no Wokwi)
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+}
+
 void loop() {
-  // Olhando para a esquerda
-  desenharOlhos(-5, 0);
-  delay(1500);
+  desenharOlhos(-6, false); // olha esquerda
+  delay(1200);
 
-  // Piscada rápida (centralizado)
-  desenharOlhos(0, 10);
-  delay(100);
+  desenharOlhos(0, true);  // pisca
+  delay(120);
 
-  // Olhando para a direita
-  desenharOlhos(5, 0);
-  delay(1500);
+  desenharOlhos(6, false); // olha direita
+  delay(1200);
 
-  // Piscada rápida (centralizado)
-  desenharOlhos(0, 10);
-  delay(100);
+  desenharOlhos(0, true);  // pisca
+  delay(120);
 }
